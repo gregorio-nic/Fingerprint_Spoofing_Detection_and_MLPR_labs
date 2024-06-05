@@ -82,3 +82,6 @@ if __name__ == '__main__':
 
     ll_1D = loglikelihood(X1D, m_ML_1D, C_ML_1D)
     print(ll_1D)
+
+
+    print(m_ML_1D.shape, C_ML_1D.shape)
