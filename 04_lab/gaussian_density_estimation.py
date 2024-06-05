@@ -76,9 +76,9 @@ if __name__ == '__main__':
 
     plt.figure()
     plt.hist(X1D.ravel(), bins=50, density=True)
-    XPlot = np.linspace(-8, 12, 1000)
-    plt.plot(XPlot.ravel(), np.exp(logpdf_GAU_ND(vrow(XPlot), m_ML_1D, C_ML_1D)))
+    XPlot_1D = np.linspace(-8, 12, 1000)
+    plt.plot(XPlot_1D.ravel(), np.exp(logpdf_GAU_ND(vrow(XPlot_1D), m_ML_1D, C_ML_1D)))
     plt.show()
 
-    ll = loglikelihood(X1D, m_ML_1D, C_ML_1D)
-    print(ll)
+    ll_1D = loglikelihood(X1D, m_ML_1D, C_ML_1D)
+    print(ll_1D)
