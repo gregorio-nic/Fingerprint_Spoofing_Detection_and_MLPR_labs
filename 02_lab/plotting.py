@@ -87,8 +87,8 @@ def project_plot_hist(D, L):
 
         plt.xlabel(Feature[f])  # nome della proprità analizzata su asse x
 
-        plt.hist(D[f, Data_Spoofed], bins=100, density=True, alpha=0.4, rwidth=0.9, label='Spoofed Fingerprint')
-        plt.hist(D[f, Data_Authentic], bins=100, density=True, alpha=0.4, rwidth=0.9, label='Authentic Fingerprint')
+        plt.hist(D[f, Data_Spoofed], bins=50, density=True, alpha=0.4, rwidth=0.9, label='Spoofed Fingerprint')
+        plt.hist(D[f, Data_Authentic], bins=50, density=True, alpha=0.4, rwidth=0.9, label='Authentic Fingerprint')
         plt.legend()
         # plt.tight_layout() -> a cosa serve??
         plt.show()
