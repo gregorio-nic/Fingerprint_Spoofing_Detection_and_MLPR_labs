@@ -3,6 +3,8 @@ import numpy as np
 import lab_05.multivariate_gaussian_model as mvg
 import scipy
 
+def err_rate(L_pred, LTE):
+    return np.count_nonzero(L_pred - LTE) / LTE.shape[0] * 100
 
 def confusion_matrix(L_pred, LTE, num_classes=2):
     M = np.zeros((num_classes, num_classes))
