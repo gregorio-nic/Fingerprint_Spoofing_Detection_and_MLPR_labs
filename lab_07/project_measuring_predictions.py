@@ -39,7 +39,7 @@ if __name__ == '__main__':
     DTE_centered = dr.center_data(DTE, DTE_mean)
     DTR_cov = 1/DTR_centered.shape[1] * DTR_centered @ DTR_centered.T
 
-    '''
+
     for num_dim in pca_dims:
         P = dr.pca(DTR_cov, num_dim)
         DTR_reduced = P.T @ DTR_centered
@@ -75,7 +75,7 @@ if __name__ == '__main__':
                   f"Confusion matrix tied version:\n{confM_tied}\n"
                   f"DCF_norm tied: {DCF_norm_tied}, minDCF_tied: {minDCF_tied}"
                   )
-    '''
+
 
 
     ######################################################################################

@@ -3,6 +3,9 @@ from scipy.optimize import fmin_l_bfgs_b
 from sklearn.datasets import load_iris
 import lab_07.measuring_predictions as mp
 
+def vcol(vector):
+    return vector.reshape(vector.size, 1)
+
 def test_function(params):
     y = params[0]
     z = params[1]
@@ -26,7 +29,7 @@ def split_db_2to1(D, L, seed=0):
     DTE = D[:, idxTest]
     LTR = L[idxTrain]
     LTE = L[idxTest]
-    return (DTR, LTR), (DTE, LTE)
+    return (DTR, LTR), (DTE, LTE.astype(int))
 
 def logreg_obj_wrap_bin(DTR, LTR, l):
     def logreg_obj_bin(v):
@@ -83,6 +86,39 @@ def Prior_Weighted_Logistic_Regression(DTR, LTR, DTE, l, working_point):
     scores_llr = w.T @ DTE + b - np.log(pi / (1.0 - pi))
     return scores, scores_llr, f
 
+def quadratic_feature_expansion(X):
+    X_T = X.T
+    X_expanded = []
+    for x in X_T:
+        outer_product = np.outer(x, x).flatten()
+        expanded_feature = np.concatenate([outer_product, x])
+        X_expanded.append(expanded_feature)
+    X_expanded = np.array(X_expanded).T
+
+    return X_expanded
+
+def Quadratic_Logistic_Regression(DTR, LTR, DTE, l):
+    n_0 = DTR[:, LTR == 0].shape[1]
+    n_1 = DTR[:, LTR == 1].shape[1]
+
+    phi_DTR = quadratic_feature_expansion(DTR)
+
+    logreg_obj_bin = logreg_obj_wrap_bin(phi_DTR, LTR, l)
+    x, f, d = fmin_l_bfgs_b(logreg_obj_bin, np.zeros((phi_DTR.shape[0] + 1)), approx_grad=True)
+
+    w = x[:phi_DTR.shape[0]]
+    b = x[phi_DTR.shape[0]:]
+
+    pi_emp = n_1 / (n_1 + n_0)
+
+    phi_DTE = quadratic_feature_expansion(DTE)
+
+    scores = w.T @ phi_DTE + b
+    scores_llr = w.T @ phi_DTE + b - np.log(pi_emp / (1.0 - pi_emp))
+    return scores, scores_llr, f
+
+    
+
 if __name__ == '__main__':
 
     ### TESTING NUMERICAL SOLVER
@@ -110,7 +146,6 @@ if __name__ == '__main__':
 
     for l in lambdas:
         scores, scores_llr, f_value = Logistic_Regression(DTR, LTR, DTE, l)
-        #print(scores)
 
         L_pred = mp.optimal_bayes_decisions_bin(scores, working_point)
         err_rate = mp.err_rate(L_pred, LTE)
