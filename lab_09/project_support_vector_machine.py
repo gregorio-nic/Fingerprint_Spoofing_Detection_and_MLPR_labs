@@ -120,8 +120,8 @@ if __name__ == '__main__':
     plt.figure()
     plt.title(f"KERNEL RBF SVM DCF & minDCF vs gamma vs C")
     for gamma in gammas:
-        plt.plot(Cs, DCFs[gamma], '-o', label=f"DCF - gamma:{gamma}")
-        plt.plot(Cs, min_DCFs[gamma], '-o', label=f"min DCF - gamma:{gamma}")
+        plt.plot(Cs, DCFs[gamma], '-o', label=f"DCF - gamma:{gamma: .2f}")
+        plt.plot(Cs, min_DCFs[gamma], '-o', label=f"min DCF - gamma:{gamma: .2f}")
     plt.xscale('log', base=10)
     plt.xlabel(f"C")
     plt.legend()
