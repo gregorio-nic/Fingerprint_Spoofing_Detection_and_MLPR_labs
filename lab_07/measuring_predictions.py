@@ -142,8 +142,8 @@ def bayes_error_plot(scores, LTE, comparing=False):
                 for prior in eff_priors
             ])
 
-            plt.plot(effPriorLogOdds, DCF_norms, label=f"DCF - {s}", color=np.random.rand(3,)%10, linewidth=2)
-            plt.plot(effPriorLogOdds, min_DCFs, label=f"min DCF - {s}", color=np.random.rand(3,)%10, linewidth=2)
+            plt.plot(effPriorLogOdds, DCF_norms, label=f"DCF - {s}", linewidth=2)
+            plt.plot(effPriorLogOdds, min_DCFs, label=f"min DCF - {s}", linewidth=2)
             plt.ylim([0, 1.1])
             plt.xlim([-3, 3])
             plt.xlabel('prior log-odds')

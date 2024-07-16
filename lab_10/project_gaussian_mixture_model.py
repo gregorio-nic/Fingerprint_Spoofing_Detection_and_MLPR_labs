@@ -1,6 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import lab_07.measuring_predictions as mp
+import lab_09.support_vector_machine as svm
+import lab_08.logistic_regression as lr
 import gaussian_mixture_model as gmm
 
 if __name__ == '__main__':
@@ -14,7 +16,7 @@ if __name__ == '__main__':
     C_fn = 1.0
     C_fp = 1.0
     working_point = (prior, C_fn, C_fp)
-
+    '''
     covTypes = ['full', 'diagonal']
     n = [1, 2, 4, 8, 16, 32]
 
@@ -39,3 +41,24 @@ if __name__ == '__main__':
         plt.xlabel(f"numComponents")
         plt.legend()
         plt.show()
+    '''
+
+    #####################################
+    ######## BEST MODELS COMPARE ##########
+    #####################################
+
+    C = np.logspace(-3, 2, 11)[9]
+    gamma = np.exp(-2)
+    l = 1e-1
+
+    best_scores_gmm = gmm.GMM(DTR, LTR, DTE, numComponents=4, covType='diagonal')
+    best_scores_svm = svm.Kernel_Support_Vector_Machine(DTR, LTR, DTE, C=C, kernel='kernel', gamma=gamma)
+    _, best_scores_lr, _ = lr.Quadratic_Logistic_Regression(DTR, LTR, DTE, l=l)
+
+    scores= {
+        'gmm': best_scores_gmm,
+        'svm': best_scores_svm,
+        'lr': best_scores_lr
+    }
+
+    mp.bayes_error_plot(scores, LTE, comparing=True)

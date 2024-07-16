@@ -20,7 +20,7 @@ if __name__ == '__main__':
     C_fp = 1.0
 
     working_point = (prior, C_fn, C_fp)
-
+    '''
     ##########################################################
     ###################### STANDARD LR #######################
     ##########################################################
@@ -129,7 +129,7 @@ if __name__ == '__main__':
     plt.xlabel(f"lambda ")
     plt.legend()
     plt.show()
-
+    '''
     ################################################
     ############ CENTERING DATASET LR ##############
     ################################################
@@ -141,7 +141,7 @@ if __name__ == '__main__':
     DCFs = []
     min_DCFs = []
     for l in lambdas:
-        scores, scores_llr, f_value = lr.Quadratic_Logistic_Regression(DTR_centered, LTR, DTE_centered, l)
+        scores, scores_llr, f_value = lr.Logistic_Regression(DTR_centered, LTR, DTE_centered, l, working_point)
 
         L_pred = mp.optimal_bayes_decisions_bin(scores_llr, working_point)
         confM = mp.confusion_matrix(L_pred, LTE)
