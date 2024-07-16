@@ -50,10 +50,14 @@ if __name__ == '__main__':
     C = np.logspace(-3, 2, 11)[9]
     gamma = np.exp(-2)
     l = 1e-1
+    eps = 1
 
     best_scores_gmm = gmm.GMM(DTR, LTR, DTE, numComponents=4, covType='diagonal')
-    best_scores_svm = svm.Kernel_Support_Vector_Machine(DTR, LTR, DTE, C=C, kernel='kernel', gamma=gamma)
+    print('finito_gmm')
+    best_scores_svm = svm.Kernel_Support_Vector_Machine(DTR, LTR, DTE, C=C, eps=eps, kernel='kernel', gamma=gamma)
+    print('finito_svm')
     _, best_scores_lr, _ = lr.Quadratic_Logistic_Regression(DTR, LTR, DTE, l=l)
+    print('finito_lr')
 
     scores= {
         'gmm': best_scores_gmm,
