@@ -23,8 +23,9 @@ def loglikelihood(X, mu, C):
 
 
 def logpdf_GAU_ND(X, mu, C):
-    Y = np.array([logpdf_GAU_ND_1_sample(X[:, i:i + 1], mu, C) for i in range(X.shape[1])]).ravel()
-    return Y
+    P = np.linalg.inv(C)
+    return -0.5 * X.shape[0] * np.log(np.pi * 2) - 0.5 * np.linalg.slogdet(C)[1] - 0.5 * (
+            (X - mu) * (P @ (X - mu))).sum(0)
 
 
 '''log density for single sample x=np.array([M, 1])'''
