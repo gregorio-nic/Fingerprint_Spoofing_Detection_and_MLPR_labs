@@ -74,8 +74,8 @@ def prior_weighted_logreg_obj_wrap_bin(DTR, LTR, l, pi, n_0, n_1):
 
 def Prior_Weighted_Logistic_Regression(DTR, LTR, DTE, l, working_point):
     pi = working_point[0]
-    n_0 = DTR[:, LTR==0].shape[1]
-    n_1 = DTR[:, LTR == 1].shape[1]
+    n_0 = DTR[:, (LTR == 0)].shape[1]
+    n_1 = DTR[:, (LTR == 1)].shape[1]
     prior_weighted_logreg_obj_bin = prior_weighted_logreg_obj_wrap_bin(DTR, LTR, l, pi, n_0, n_1)
     x, f, d = fmin_l_bfgs_b(prior_weighted_logreg_obj_bin, np.zeros((DTR.shape[0] + 1)), approx_grad=True)
 

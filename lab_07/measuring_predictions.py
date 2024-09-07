@@ -118,8 +118,6 @@ def bayes_error_plot(scores, LTE, comparing=False):
         effPriorLogOdds = np.linspace(-3, 3, 21)
     eff_priors = 1/(1+np.exp(-effPriorLogOdds))
 
-    print(eff_priors)
-
     if comparing is True:
 
         plt.figure()
@@ -143,7 +141,7 @@ def bayes_error_plot(scores, LTE, comparing=False):
             ])
 
             plt.plot(effPriorLogOdds, DCF_norms, label=f"DCF - {s}", linewidth=2)
-            plt.plot(effPriorLogOdds, min_DCFs, label=f"min DCF - {s}", linewidth=2)
+            plt.plot(effPriorLogOdds, min_DCFs, label=f"min DCF - {s}", linewidth=2, linestyle='--')
             plt.ylim([0, 1.1])
             plt.xlim([-3, 3])
             plt.xlabel('prior log-odds')
@@ -173,7 +171,7 @@ def bayes_error_plot(scores, LTE, comparing=False):
         ])
 
         plt.plot(effPriorLogOdds, DCF_norms, label=f"DCF", color='r', linewidth=2)
-        plt.plot(effPriorLogOdds, min_DCFs, label=f"min DCF", color='b', linewidth=2)
+        plt.plot(effPriorLogOdds, min_DCFs, label=f"min DCF", color='b', linewidth=2, linestyle='--')
         plt.ylim([0, 1.1])
         plt.xlim([-3, 3])
         plt.xlabel('prior log-odds')
