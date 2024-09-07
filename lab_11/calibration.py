@@ -40,7 +40,7 @@ def load_iris_binary():
     return D, L
 
 
-def single_fold_calibration(scores, labels, eval_scores, eval_labels, working_point):
+def single_fold_calibration(scores, labels, eval_scores, eval_labels, working_point, evaluation=False):
     SCAL, SVAL = scores[::3], np.hstack([scores[1::3], scores[2::3]])
     LCAL, LVAL = labels[::3], np.hstack([labels[1::3], labels[2::3]])
 
@@ -65,19 +65,22 @@ def single_fold_calibration(scores, labels, eval_scores, eval_labels, working_po
 
     actDCF_val = mp.bayes_risk_norm(working_point, confM_val)
     print(f'AFTER CALIBRATION (VALIDATION SET): minDCF (pT={working_point[0]}) = {minDCF_val} - actDCF (pT={working_point[0]}) = {actDCF_val}')
+    mp.bayes_error_plot(SVAL_calibrated, LVAL)
 
-    # Post-calibration (EVALUATION)
-    eval_scores_calibrated = train_calibration_SINGLE_FOLD(vrow(SCAL), LCAL, vrow(eval_scores), working_point, l=0.0)
+    if evaluation is True:
+        # Post-calibration (EVALUATION)
+        eval_scores_calibrated = train_calibration_SINGLE_FOLD(vrow(SCAL), LCAL, vrow(eval_scores), working_point, l=0.0)
 
-    minDCF_eval = mp.min_DCF(eval_scores_calibrated, eval_labels, working_point)
-    L_pred_eval = mp.optimal_bayes_decisions_bin(eval_scores_calibrated, working_point)
-    confM_eval = mp.confusion_matrix(L_pred_eval, eval_labels)
+        minDCF_eval = mp.min_DCF(eval_scores_calibrated, eval_labels, working_point)
+        L_pred_eval = mp.optimal_bayes_decisions_bin(eval_scores_calibrated, working_point)
+        confM_eval = mp.confusion_matrix(L_pred_eval, eval_labels)
 
-    actDCF_eval = mp.bayes_risk_norm(working_point, confM_eval)
-    print(f'AFTER CALIBRATION (EVALUATION SET): minDCF (pT={working_point[0]}) = {minDCF_eval} - actDCF (pT={working_point[0]}) = {actDCF_eval}')
-    return eval_scores_calibrated
+        actDCF_eval = mp.bayes_risk_norm(working_point, confM_eval)
+        print(f'AFTER CALIBRATION (EVALUATION SET): minDCF (pT={working_point[0]}) = {minDCF_eval} - actDCF (pT={working_point[0]}) = {actDCF_eval}')
+        return eval_scores_calibrated
+    return SVAL_calibrated
 
-def k_fold_calibration(scores, labels, eval_scores, eval_labels, working_point, KFOLD):
+def k_fold_calibration(scores, labels, eval_scores, eval_labels, working_point, KFOLD, evaluation=False):
     size = int(labels.size / KFOLD)
 
     cal_models = {}
@@ -108,18 +111,20 @@ def k_fold_calibration(scores, labels, eval_scores, eval_labels, working_point, 
     mp.bayes_error_plot(scores, labels)
     mp.bayes_error_plot(calibrated_scores_val, calibrated_labels_val)
 
-    # Post-calibration (EVALUATION)
-    eval_scores_calibrated = train_calibration_SINGLE_FOLD(vrow(scores), labels, vrow(eval_scores), working_point, l=0.0)
+    if evaluation is True:
+        # Post-calibration (EVALUATION)
+        eval_scores_calibrated = train_calibration_SINGLE_FOLD(vrow(scores), labels, vrow(eval_scores), working_point, l=0.0)
 
-    minDCF_eval = mp.min_DCF(eval_scores_calibrated, eval_labels, working_point)
-    L_pred_eval = mp.optimal_bayes_decisions_bin(eval_scores_calibrated, working_point)
-    confM_eval = mp.confusion_matrix(L_pred_eval, eval_labels)
+        minDCF_eval = mp.min_DCF(eval_scores_calibrated, eval_labels, working_point)
+        L_pred_eval = mp.optimal_bayes_decisions_bin(eval_scores_calibrated, working_point)
+        confM_eval = mp.confusion_matrix(L_pred_eval, eval_labels)
 
-    actDCF_eval = mp.bayes_risk_norm(working_point, confM_eval)
-    print(f'AFTER CALIBRATION (EVALUATION SET): minDCF (pT={working_point[0]}) = {minDCF_eval} - actDCF (pT={working_point[0]}) = {actDCF_eval}')
-    return eval_scores_calibrated
+        actDCF_eval = mp.bayes_risk_norm(working_point, confM_eval)
+        print(f'AFTER CALIBRATION (EVALUATION SET): minDCF (pT={working_point[0]}) = {minDCF_eval} - actDCF (pT={working_point[0]}) = {actDCF_eval}')
+        return eval_scores_calibrated
+    return calibrated_scores_val
 
-def single_fold_fusion(scores: dict, labels, eval_scores: dict, eval_labels, working_point):
+def single_fold_fusion(scores: dict, labels, eval_scores: dict, eval_labels, working_point, evaluation=False):
 
     stacked_scores_cal = np.array([])
     stacked_scores_val = np.array([])
@@ -129,8 +134,9 @@ def single_fold_fusion(scores: dict, labels, eval_scores: dict, eval_labels, wor
         stacked_scores_cal = np.vstack([stacked_scores_cal, SCAL])
         stacked_scores_val = np.vstack([stacked_scores_val, SVAL])
 
-    for eval_score in eval_scores:
-        stacked_scores_val = np.vstack([stacked_scores_val, eval_score])
+    if evaluation is True:
+        for eval_score in eval_scores:
+            stacked_scores_eval = np.vstack([stacked_scores_eval, eval_score])
 
     LCAL, LVAL = labels[::3], np.hstack([labels[1::3], labels[2::3]])
 
@@ -149,21 +155,23 @@ def single_fold_fusion(scores: dict, labels, eval_scores: dict, eval_labels, wor
 
     mp.bayes_error_plot(fused_SVAL, LVAL)
 
-    # Post-calibration
-    fused_EVAL = train_calibration_SINGLE_FOLD(stacked_scores_cal, LCAL, stacked_scores_eval,
-                                               working_point, l=0.0)
+    if evaluation is True:
+        # Post-calibration
+        fused_EVAL = train_calibration_SINGLE_FOLD(stacked_scores_cal, LCAL, stacked_scores_eval,
+                                                   working_point, l=0.0)
 
-    minDCF_EVAL = mp.min_DCF(fused_EVAL, eval_labels, working_point)
-    L_pred_EVAL = mp.optimal_bayes_decisions_bin(fused_EVAL, working_point)
-    confM_EVAL = mp.confusion_matrix(L_pred_EVAL, eval_labels)
+        minDCF_EVAL = mp.min_DCF(fused_EVAL, eval_labels, working_point)
+        L_pred_EVAL = mp.optimal_bayes_decisions_bin(fused_EVAL, working_point)
+        confM_EVAL = mp.confusion_matrix(L_pred_EVAL, eval_labels)
 
-    actDCF_EVAL = mp.bayes_risk_norm(working_point, confM_EVAL)
-    print(f'AFTER FUSION (EVALUATION SET): minDCF (pT={working_point[0]}) = {minDCF_EVAL} - actDCF (pT={working_point[0]}) = {actDCF_EVAL}')
+        actDCF_EVAL = mp.bayes_risk_norm(working_point, confM_EVAL)
+        print(f'AFTER FUSION (EVALUATION SET): minDCF (pT={working_point[0]}) = {minDCF_EVAL} - actDCF (pT={working_point[0]}) = {actDCF_EVAL}')
 
-    mp.bayes_error_plot(fused_EVAL, eval_labels)
-    return fused_EVAL
+        mp.bayes_error_plot(fused_EVAL, eval_labels)
+        return fused_EVAL
+    return fused_SVAL
 
-def k_fold_fusion(scores: dict, labels, eval_scores: dict, eval_labels, working_point, KFOLD):
+def k_fold_fusion(scores: dict, labels, eval_scores: dict, eval_labels, working_point, KFOLD, evaluation=False):
     size = int(labels.size / KFOLD)
 
     cal_models = {}
@@ -207,52 +215,45 @@ def k_fold_fusion(scores: dict, labels, eval_scores: dict, eval_labels, working_
 
     mp.bayes_error_plot(fused_scores_VAL, fused_labels_VAL)
 
-    # Used to compare system1 vs system 2 vs fusion dcfs
-    # comparing = {
-    #    'system1':scores_1,
-    #    'system2':scores_2,
-    #    'fusion':fused_scores_VAL
-    # }
-    # mp.bayes_error_plot(comparing, fused_labels_VAL, comparing=True)
-
     # EVALUATION
-    scores_CAL = np.array([])
-    for score in scores:
-        scores_CAL = np.vstack([scores_CAL, score])
+    if evaluation is True:
+        scores_CAL = np.array([])
+        for score in scores:
+            scores_CAL = np.vstack([scores_CAL, score])
 
 
-    scores_EVAL = np.array([])
-    for score in eval_scores:
-        scores_EVAL = np.vstack([scores_EVAL, score])
+        scores_EVAL = np.array([])
+        for score in eval_scores:
+            scores_EVAL = np.vstack([scores_EVAL, score])
 
 
-    fused_scores_EVAL = train_calibration_SINGLE_FOLD(scores_CAL,
-                                                      labels,
-                                                      scores_EVAL,
-                                                      working_point,
-                                                      l=0.0
-                                                      )
+        fused_scores_EVAL = train_calibration_SINGLE_FOLD(scores_CAL,
+                                                          labels,
+                                                          scores_EVAL,
+                                                          working_point,
+                                                          l=0.0
+                                                          )
 
 
-    minDCF_EVAL = mp.min_DCF(fused_scores_EVAL, eval_labels, working_point)
-    predicted_labels_EVAL = mp.optimal_bayes_decisions_bin(fused_scores_EVAL, working_point)
-    confM_EVAL = mp.confusion_matrix(predicted_labels_EVAL, eval_labels)
+        minDCF_EVAL = mp.min_DCF(fused_scores_EVAL, eval_labels, working_point)
+        predicted_labels_EVAL = mp.optimal_bayes_decisions_bin(fused_scores_EVAL, working_point)
+        confM_EVAL = mp.confusion_matrix(predicted_labels_EVAL, eval_labels)
 
-    actDCF_EVAL = mp.bayes_risk_norm(working_point, confM_EVAL)
-    print(f'AFTER FUSION (EVALUATION SET): minDCF (pT={working_point[0]}) = {minDCF_EVAL} - actDCF (pT={working_point[0]}) = {actDCF_EVAL}')
+        actDCF_EVAL = mp.bayes_risk_norm(working_point, confM_EVAL)
+        print(f'AFTER FUSION (EVALUATION SET): minDCF (pT={working_point[0]}) = {minDCF_EVAL} - actDCF (pT={working_point[0]}) = {actDCF_EVAL}')
 
-    mp.bayes_error_plot(fused_scores_EVAL, eval_labels)
+        mp.bayes_error_plot(fused_scores_EVAL, eval_labels)
 
-    # Used to compare system1 vs system 2 vs fusion dcfs
-    eval_scores['Fusion'] = fused_scores_EVAL
+        # Used to compare system1 vs system 2 vs fusion dcfs
+        eval_scores['Fusion'] = fused_scores_EVAL
 
-    mp.bayes_error_plot(eval_scores, eval_labels, comparing=True)
-    return fused_scores_EVAL
-
+        mp.bayes_error_plot(eval_scores, eval_labels, comparing=True)
+        return fused_scores_EVAL
+    return fused_scores_VAL
 
 
 if __name__ == '__main__':
-
+    '''
     scores_1 = np.load('Data/scores_1.npy')
     scores_2 = np.load('Data/scores_2.npy')
 
@@ -274,7 +275,7 @@ if __name__ == '__main__':
     s1_confM = mp.confusion_matrix(s1_L_pred, labels)
     s2_confM = mp.confusion_matrix(s2_L_pred, labels)
 
-    '''
+    
     s1_act_DCF = mp.bayes_risk_norm(working_point, s1_confM)
     s2_act_DCF = mp.bayes_risk_norm(working_point, s2_confM)
 
@@ -457,7 +458,7 @@ if __name__ == '__main__':
 
     mp.bayes_error_plot(fused_EVAL, LEVAL)
 
-    '''
+    
     ############################################################
     ###################### K-FOLD FUSION #######################
     ############################################################
@@ -546,5 +547,4 @@ if __name__ == '__main__':
         'fusion': fused_scores_EVAL
     }
     mp.bayes_error_plot(comparing, fused_labels_EVAL, comparing=True)
-
-    #########################################################################################################
+    '''
