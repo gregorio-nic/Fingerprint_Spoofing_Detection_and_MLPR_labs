@@ -1,7 +1,6 @@
 import numpy as np
-
+import scipy
 import matplotlib.pyplot as plt
-import sys
 
 
 '''turns vector into row-matrix'''
@@ -71,17 +70,41 @@ def center_data(D, mu):
     return D - mu
 
 
-def lda(D, L):
-    L_0 = L == 0
-    L_1 = L == 1
-    L_2 = L == 2
+def compute_Sb_Sw(D, L):
+    Sb = 0
+    Sw = 0
+    mu = vcol(D.mean(1))
+    for i in np.unique(L):
+        D_class = D[:, L == i]
+        mu_class = vcol(D_class.mean(1))
+        Sb += (mu_class - mu) @ (mu_class - mu).T * D_class.shape[1]
+        Sw += (D_class - mu_class) @ (D_class - mu_class).T
+    return Sb / D.shape[1], Sw / D.shape[1]
 
-    print(D[:, L_0].shape, D.shape)
 
-    for l in range(3):
-        D_filtered = D[:, L==l]
-        C = 1/D_filtered.shape[1]
+def compute_lda(D, L, m):
+    Sb, Sw = compute_Sb_Sw(D, L)
+    s, U = scipy.linalg.eigh(Sb, Sw)
+    return U[:, ::-1][:, 0:m]
 
+
+def apply_lda(U, D):
+    return U.T @ D
+
+def split_db_2to1(D, L, seed=0):
+    nTrain = int(D.shape[1] * 2.0 / 3.0)
+    np.random.seed(seed)
+    idx = np.random.permutation(D.shape[1])
+    idxTrain = idx[0:nTrain]
+    idxTest = idx[nTrain:]
+
+    DTR = D[:, idxTrain]
+    LTR = L[idxTrain]
+
+    DTE = D[:, idxTest]
+    LTE = L[idxTest]
+
+    return (DTR, LTR), (DTE, LTE)
 
 if __name__ == '__main__':
     D, L = load('../iris.csv')
@@ -106,4 +129,3 @@ if __name__ == '__main__':
 
 
     #LDA
-    lda(D, L)

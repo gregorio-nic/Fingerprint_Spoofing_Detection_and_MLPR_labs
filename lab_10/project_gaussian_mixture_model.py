@@ -16,7 +16,7 @@ if __name__ == '__main__':
     C_fn = 1.0
     C_fp = 1.0
     working_point = (prior, C_fn, C_fp)
-    '''
+
     covTypes = ['full', 'diagonal']
     n = [1, 2, 4, 8, 16, 32]
 
@@ -41,12 +41,12 @@ if __name__ == '__main__':
         plt.xlabel(f"numComponents")
         plt.legend()
         plt.show()
-    '''
+
 
     #####################################
     ######## BEST MODELS COMPARE ##########
     #####################################
-
+    '''
     C = np.logspace(-3, 2, 11)[9]
     gamma = np.exp(-2)
     l = 1e-1
@@ -66,3 +66,4 @@ if __name__ == '__main__':
     }
 
     mp.bayes_error_plot(scores, LTE, comparing=True)
+    '''
