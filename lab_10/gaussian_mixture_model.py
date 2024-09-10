@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from sklearn.datasets import load_iris
 
 import lab_04.gaussian_density_estimation as gde
-import GMM_load
+import lab_10.GMM_load
 import lab_07.measuring_predictions as mp
 
 

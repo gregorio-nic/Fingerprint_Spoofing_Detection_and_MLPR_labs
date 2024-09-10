@@ -100,6 +100,17 @@ def k_fold_calibration(scores, labels, eval_scores, eval_labels, working_point, 
                                                                        vrow(cal_models[i][2]), working_point, l=0.0)))
         calibrated_labels_val = np.hstack((calibrated_labels_val, cal_models[i][3]))
 
+
+    L_pred_val = mp.optimal_bayes_decisions_bin(scores, working_point)
+
+    confM_val = mp.confusion_matrix(L_pred_val, labels)
+
+    act_DCF_val = mp.bayes_risk_norm(working_point, confM_val)
+
+    DCF_min_val = mp.min_DCF(scores, labels, working_point)
+
+    print(f"BEFORE CALIBRATION (VALIDATION SET): min_DCF (pT={working_point[0]}) = {DCF_min_val},  actDCF_val (pT={working_point[0]}) = {act_DCF_val}")
+
     calibrated_labels_val = calibrated_labels_val.astype(int)
     minDCF_val = mp.min_DCF(calibrated_scores_val, calibrated_labels_val, working_point)
     predicted_labels_val = mp.optimal_bayes_decisions_bin(calibrated_scores_val, working_point)
@@ -181,10 +192,15 @@ def k_fold_fusion(scores: dict, labels, eval_scores: dict, eval_labels, working_
     for i in range(KFOLD):
         SCAL = np.array([])
         SVAL = np.array([])
-        for score in scores:
-            SCAL = np.vstack([SCAL, np.hstack((score[:(size * i)], score[(size * (i + 1)):]))])
-
-            SVAL = np.vstack([SVAL, score[(size * i):(size * (i + 1))]])
+        for score in scores.values():
+            if SCAL.size == 0:
+                SCAL = np.hstack((score[:(size * i)], score[(size * (i + 1)):]))
+            else:
+                SCAL = np.vstack([SCAL, np.hstack((score[:(size * i)], score[(size * (i + 1)):]))])
+            if SVAL.size == 0:
+                SVAL = score[(size * i):(size * (i + 1))]
+            else:
+                SVAL = np.vstack([SVAL, score[(size * i):(size * (i + 1))]])
 
         # Building folds for each calibration model
         cal_models[i] = (
@@ -218,13 +234,19 @@ def k_fold_fusion(scores: dict, labels, eval_scores: dict, eval_labels, working_
     # EVALUATION
     if evaluation is True:
         scores_CAL = np.array([])
-        for score in scores:
-            scores_CAL = np.vstack([scores_CAL, score])
+        for score in scores.values():
+            if scores_CAL.size == 0:
+                scores_CAL = score
+            else:
+                scores_CAL = np.vstack([scores_CAL, score])
 
 
         scores_EVAL = np.array([])
-        for score in eval_scores:
-            scores_EVAL = np.vstack([scores_EVAL, score])
+        for score in eval_scores.values():
+            if scores_EVAL.size == 0:
+                scores_EVAL = score
+            else:
+                scores_EVAL = np.vstack([scores_EVAL, score])
 
 
         fused_scores_EVAL = train_calibration_SINGLE_FOLD(scores_CAL,

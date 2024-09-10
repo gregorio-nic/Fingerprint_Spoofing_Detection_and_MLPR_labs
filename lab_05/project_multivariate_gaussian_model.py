@@ -1,6 +1,7 @@
 import numpy as np
 import lab_05.multivariate_gaussian_model as mvg
 import matplotlib.pyplot as plt
+import lab_03.dimensionality_reduction as dr
 
 np.set_printoptions(linewidth=np.inf)
 
@@ -144,7 +145,7 @@ if __name__ == '__main__':
 
     (DTR, LTR), (DTE, LTE) = split_db_2to1(D, L)
 
-    llr = MVG_standard(DTR, LTR, DTE, LTE)
+    llr = MVG_standard(DTR, LTR, DTE)
 
     pi = np.ones((2, 1)) * (1.0/2.0)
 
@@ -167,6 +168,166 @@ if __name__ == '__main__':
     print("\n")
 
     llr = MVG_naive(DTR, LTR, DTE)
+
+    pi = np.ones((2, 1)) * (1.0 / 2.0)
+
+    threshold = -np.log(pi[1, :] / pi[0, :])
+
+    predicted_labels = np.array([1 if l >= threshold else 0 for l in llr])
+
+    print(f"Naive error rate = {mvg.err_rate(predicted_labels, LTE)} %")
+    print("\n")
+
+    ### Discarding features 4 and 5
+    '''DTR, DTE = DTR[:4:, :], DTE[:4:, :]
+
+
+    llr = MVG_standard(DTR, LTR, DTE)
+
+    pi = np.ones((2, 1)) * (1.0 / 2.0)
+
+    threshold = -np.log(pi[1, :] / pi[0, :])
+
+    predicted_labels = np.array([1 if l >= threshold else 0 for l in llr])
+
+    print(f"Standard error rate = {mvg.err_rate(predicted_labels, LTE)} %")
+    print("\n")
+
+    llr = MVG_tied(DTR, LTR, DTE)
+
+    pi = np.ones((2, 1)) * (1.0 / 2.0)
+
+    threshold = -np.log(pi[1, :] / pi[0, :])
+
+    predicted_labels = np.array([1 if l >= threshold else 0 for l in llr])
+
+    print(f"Tied error rate = {mvg.err_rate(predicted_labels, LTE)} %")
+    print("\n")
+
+    llr = MVG_naive(DTR, LTR, DTE)
+
+    pi = np.ones((2, 1)) * (1.0 / 2.0)
+
+    threshold = -np.log(pi[1, :] / pi[0, :])
+
+    predicted_labels = np.array([1 if l >= threshold else 0 for l in llr])
+
+    print(f"Naive error rate = {mvg.err_rate(predicted_labels, LTE)} %")
+    print("\n")
+
+    ### USING only features 1 and 2
+    
+    DTR, DTE = DTR[:2:, :], DTE[:2:, :]
+
+    llr = MVG_standard(DTR, LTR, DTE)
+
+    pi = np.ones((2, 1)) * (1.0 / 2.0)
+
+    threshold = -np.log(pi[1, :] / pi[0, :])
+
+    predicted_labels = np.array([1 if l >= threshold else 0 for l in llr])
+
+    print(f"Standard error rate = {mvg.err_rate(predicted_labels, LTE)} %")
+    print("\n")
+
+    llr = MVG_tied(DTR, LTR, DTE)
+
+    pi = np.ones((2, 1)) * (1.0 / 2.0)
+
+    threshold = -np.log(pi[1, :] / pi[0, :])
+
+    predicted_labels = np.array([1 if l >= threshold else 0 for l in llr])
+
+    print(f"Tied error rate = {mvg.err_rate(predicted_labels, LTE)} %")
+    print("\n")
+
+    llr = MVG_naive(DTR, LTR, DTE)
+
+    pi = np.ones((2, 1)) * (1.0 / 2.0)
+
+    threshold = -np.log(pi[1, :] / pi[0, :])
+
+    predicted_labels = np.array([1 if l >= threshold else 0 for l in llr])
+
+    print(f"Naive error rate = {mvg.err_rate(predicted_labels, LTE)} %")
+    print("\n")
+    
+    ### USING only features 3 and 4
+    DTR, DTE = DTR[2:4:, :], DTE[2:4:, :]
+
+    llr = MVG_standard(DTR, LTR, DTE)
+
+    pi = np.ones((2, 1)) * (1.0 / 2.0)
+
+    threshold = -np.log(pi[1, :] / pi[0, :])
+
+    predicted_labels = np.array([1 if l >= threshold else 0 for l in llr])
+
+    print(f"Standard error rate = {mvg.err_rate(predicted_labels, LTE)} %")
+    print("\n")
+
+    llr = MVG_tied(DTR, LTR, DTE)
+
+    pi = np.ones((2, 1)) * (1.0 / 2.0)
+
+    threshold = -np.log(pi[1, :] / pi[0, :])
+
+    predicted_labels = np.array([1 if l >= threshold else 0 for l in llr])
+
+    print(f"Tied error rate = {mvg.err_rate(predicted_labels, LTE)} %")
+    print("\n")
+
+    llr = MVG_naive(DTR, LTR, DTE)
+
+    pi = np.ones((2, 1)) * (1.0 / 2.0)
+
+    threshold = -np.log(pi[1, :] / pi[0, :])
+
+    predicted_labels = np.array([1 if l >= threshold else 0 for l in llr])
+
+    print(f"Naive error rate = {mvg.err_rate(predicted_labels, LTE)} %")
+    print("\n")
+    '''
+
+    ### PCA
+
+    mu = dr.vcol(np.mean(DTR, axis=1))
+
+    D = dr.center_data(D, mu)
+
+    (DTRC, LTR), (DTEC, LTE) = split_db_2to1(D, L)
+
+    C = 1 / DTRC.shape[1] * DTRC @ DTRC.T
+
+    # PCA
+    P = dr.pca(C, dim=6)
+
+    DTRP = P.T @ DTRC
+    DTEP = P.T @ DTEC
+
+    llr = MVG_standard(DTRP, LTR, DTEP)
+
+    pi = np.ones((2, 1)) * (1.0 / 2.0)
+
+    threshold = -np.log(pi[1, :] / pi[0, :])
+
+    predicted_labels = np.array([1 if l >= threshold else 0 for l in llr])
+
+    print(f"Standard error rate = {mvg.err_rate(predicted_labels, LTE)} %")
+    print("\n")
+
+    llr = MVG_tied(DTRP, LTR, DTEP)
+
+    pi = np.ones((2, 1)) * (1.0 / 2.0)
+
+    threshold = -np.log(pi[1, :] / pi[0, :])
+
+    predicted_labels = np.array([1 if l >= threshold else 0 for l in llr])
+
+    print(f"Tied error rate = {mvg.err_rate(predicted_labels, LTE)} %")
+    print("\n")
+
+    llr = MVG_naive(DTRP, LTR, DTEP)
 
     pi = np.ones((2, 1)) * (1.0 / 2.0)
 

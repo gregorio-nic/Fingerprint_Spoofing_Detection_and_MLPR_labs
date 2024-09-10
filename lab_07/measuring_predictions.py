@@ -146,7 +146,7 @@ def bayes_error_plot(scores, LTE, comparing=False):
             plt.xlim([-3, 3])
             plt.xlabel('prior log-odds')
             plt.ylabel('DCF value')
-            plt.legend(loc=3)
+            plt.legend()
 
         plt.show()
 
@@ -176,7 +176,7 @@ def bayes_error_plot(scores, LTE, comparing=False):
         plt.xlim([-3, 3])
         plt.xlabel('prior log-odds')
         plt.ylabel('DCF value')
-        plt.legend(loc=3)
+        plt.legend()
 
         plt.show()
 

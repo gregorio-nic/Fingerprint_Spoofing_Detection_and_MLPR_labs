@@ -22,7 +22,7 @@ if __name__ == '__main__':
                       (0.5, 9.0, 1.0)
                       ]
 
-    pca_dims = [2, 3, 4, 5, 6]
+    pca_dims = [1, 2, 3, 4, 5, 6]
 
 
     for wp in working_points:
@@ -39,6 +39,36 @@ if __name__ == '__main__':
     DTE_centered = dr.center_data(DTE, DTE_mean)
     DTR_cov = 1/DTR_centered.shape[1] * DTR_centered @ DTR_centered.T
 
+    llr_std = mvg.MVG_standard(DTR, LTR, DTE)
+    llr_naive = mvg.MVG_naive(DTR, LTR, DTE)
+    llr_tied = mvg.MVG_tied(DTR, LTR, DTE)
+    '''
+    for wp in working_points:
+
+        eff_prior = (wp[0] * wp[1]) / ((wp[0] * wp[1]) + ((1 - wp[0]) * wp[2]))
+
+        L_pred_std = mp.optimal_bayes_decisions_bin(llr_std, wp)
+        confM_std = mp.confusion_matrix(L_pred_std, LTE)
+        DCF_norm_std = mp.bayes_risk_norm(wp, confM_std)
+        minDCF_std = mp.min_DCF(llr_std, LTE, wp)
+
+        L_pred_naive = mp.optimal_bayes_decisions_bin(llr_naive, wp)
+        confM_naive = mp.confusion_matrix(L_pred_naive, LTE)
+        DCF_norm_naive = mp.bayes_risk_norm(wp, confM_naive)
+        minDCF_naive = mp.min_DCF(llr_naive, LTE, wp)
+
+        L_pred_tied = mp.optimal_bayes_decisions_bin(llr_tied, wp)
+        confM_tied = mp.confusion_matrix(L_pred_tied, LTE)
+        DCF_norm_tied = mp.bayes_risk_norm(wp, confM_tied)
+        minDCF_tied = mp.min_DCF(llr_tied, LTE, wp)
+        print(f"--------------- Working_point: {wp} - Effective prior: {eff_prior}  ---------------\n"
+              f"Confusion matrix standard version:\n{confM_std}\n"
+              f"DCF_norm std: {DCF_norm_std}, minDCF_std: {minDCF_std}\n"
+              f"Confusion matrix naive version:\n{confM_naive}\n"
+              f"DCF_norm naive: {DCF_norm_naive}, minDCF_naive: {minDCF_naive}\n"
+              f"Confusion matrix tied version:\n{confM_tied}\n"
+              f"DCF_norm tied: {DCF_norm_tied}, minDCF_tied: {minDCF_tied}"
+              )
 
     for num_dim in pca_dims:
         P = dr.pca(DTR_cov, num_dim)
@@ -77,13 +107,13 @@ if __name__ == '__main__':
                   )
 
 
-
+    '''
     ######################################################################################
-    ##########################pi_tilde=0.1 - BEST_PCA=6 (NO PCA)##########################
+    ##########################pi_tilde=0.1 - BEST_PCA=3 ##########################
     ######################################################################################
 
-    wp = working_points[3]
-    num_dim = 6
+    wp = working_points[2]
+    num_dim = 3
 
     P = dr.pca(DTR_cov, num_dim)
     DTR_reduced = P.T @ DTR_centered
